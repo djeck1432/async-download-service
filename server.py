@@ -8,8 +8,6 @@ from dotenv import load_dotenv
 from aiohttp.web_exceptions import HTTPNotFound
 
 
-
-
 def get_params_envirement():
     load_dotenv()
     archives_path = os.getenv('ARCHIVES_PATH')
@@ -32,17 +30,16 @@ async def archivate(request):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=archives_path,
-            timeout=1,
         )
-    download_b_size = 500 * 1024
-    archive_stdout = b''
+    chunk_b_size = 500 * 1024
+    archive = b''
     try:
         while True:
-            stdout_chunk = await process.stdout.read(download_b_size)
+            stdout_chunk = await process.stdout.read(chunk_b_size)
             await asyncio.sleep(response_delay)
             if stdout_chunk:
-                archive_stdout += stdout_chunk
-                await response.write(archive_stdout)
+                archive += stdout_chunk
+                await response.write(archive)
             else:
                 logger.info('Archive downloaded success')
                 break
@@ -63,12 +60,11 @@ async def handle_index_page(request):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Setting log output')
     parser.add_argument(
-        'file_path',
-        choices=['log_off','log_on'],
-        help='Write name of file,where will be saving the logs'
+        '--logs',
+        help='Switch on logging'
     )
     args = parser.parse_args()
-    if args.file_path == 'switch_on':
+    if args.logs == 'on':
         logger = logging.getLogger('archive')
         logging.basicConfig(
             format=u'%(levelname)-8s %(message)s', level=logging.INFO, filename=u'logs.log'
