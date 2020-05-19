@@ -37,8 +37,7 @@ async def archivate(request):
     archive_name = request.match_info.get('archive_hash')
     folders_path,response_delay = get_environment_params()
     if not os.path.exists(f'{folders_path}/{archive_name}'):
-        raise HTTPNotFound(headers=None, reason=None,
-             body=None, text='Ваша папка не найдена', content_type=None)
+        raise HTTPNotFound(text='Ваша папка не найдена')
 
     response.headers['Content-Disposition'] = f'form-data; filename={archive_name}.zip'
     await response.prepare(request)
