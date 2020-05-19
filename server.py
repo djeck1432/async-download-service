@@ -7,12 +7,30 @@ from aiohttp import web
 from dotenv import load_dotenv
 from aiohttp.web_exceptions import HTTPNotFound
 
+logger = logging.getLogger('archive')
 
 def get_params_environment():
     load_dotenv()
-    archives_path = os.getenv('ARCHIVES_PATH')
-    response_delay = os.getenv('RESPONSE_DELAY')
-    return archives_path,int(response_delay)
+    parser = argparse.ArgumentParser(description='Setting log output')
+    parser.add_argument(
+        '--logs',
+        action='store_true',
+        help='Switch on logging'
+    )
+    parser.add_argument(
+        '--delay',
+        help='Install response delay for server'
+    )
+    parser.add_argument(
+        '--archives_path',
+        help='Write path to archives'
+    )
+    args = parser.parse_args()
+    if args.logs:
+        logging.basicConfig(
+            format=u'%(levelname)-8s %(message)s', level=logging.INFO, filename=u'logs.log'
+        )
+    return args.archives_path,int(args.delay)
 
 async def archivate(request):
     response = web.StreamResponse()
@@ -31,15 +49,13 @@ async def archivate(request):
             stderr=asyncio.subprocess.PIPE,
             cwd=archives_path,
         )
-    chunk_b_size = 500 * 1024
-    archive = b''
+    chunk_b_size = 100 * 1024
     try:
         while True:
             stdout_chunk = await process.stdout.read(chunk_b_size)
             await asyncio.sleep(response_delay)
             if stdout_chunk:
-                archive += stdout_chunk
-                await response.write(archive)
+                await response.write(stdout_chunk)
             else:
                 logger.info('Archive downloaded success')
                 break
@@ -59,21 +75,10 @@ async def handle_index_page(request):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Setting log output')
-    parser.add_argument(
-        '--logs',
-        help='Switch on logging'
-    )
-    args = parser.parse_args()
-    if args.logs == 'on':
-        logger = logging.getLogger('archive')
-        logging.basicConfig(
-            format=u'%(levelname)-8s %(message)s', level=logging.INFO, filename=u'logs.log'
-        )
+
     app = web.Application()
     app.add_routes([
         web.get('/', handle_index_page),
         web.get('/archive/{archive_hash}/', archivate),
-        web.get('/archive/7kna/', archivate),
     ])
     web.run_app(app)
