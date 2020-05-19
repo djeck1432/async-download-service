@@ -22,7 +22,7 @@ def get_params_environment():
         help='Install response delay for server'
     )
     parser.add_argument(
-        '--folders_path',
+        'folders_path',
         help='Write path to archives'
     )
     args = parser.parse_args()
