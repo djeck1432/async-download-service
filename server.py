@@ -9,7 +9,7 @@ from aiohttp.web_exceptions import HTTPNotFound
 
 logger = logging.getLogger('archive')
 
-def get_params_environment():
+def get_environment_params():
     load_dotenv()
     parser = argparse.ArgumentParser(description='Setting log output')
     parser.add_argument(
@@ -35,7 +35,7 @@ def get_params_environment():
 async def archivate(request):
     response = web.StreamResponse()
     archive_name = request.match_info.get('archive_hash')
-    folders_path,response_delay = get_params_environment()
+    folders_path,response_delay = get_environment_params()
     if not os.path.exists(f'{folders_path}/{archive_name}'):
         raise HTTPNotFound(headers=None, reason=None,
              body=None, text='Ваша папка не найдена', content_type=None)
