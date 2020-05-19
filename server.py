@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from aiohttp.web_exceptions import HTTPNotFound
 
 
-def get_params_envirement():
+def get_params_environment():
     load_dotenv()
     archives_path = os.getenv('ARCHIVES_PATH')
     response_delay = os.getenv('RESPONSE_DELAY')
@@ -17,7 +17,7 @@ def get_params_envirement():
 async def archivate(request):
     response = web.StreamResponse()
     archive_name = request.match_info.get('archive_hash')
-    archives_path,response_delay = get_params_envirement()
+    archives_path,response_delay = get_params_environment()
     if not os.path.exists(f'{archives_path}/{archive_name}'):
         raise HTTPNotFound(headers=None, reason=None,
              body=None, text='Ваша папка не найдена', content_type=None)
@@ -46,6 +46,7 @@ async def archivate(request):
     except asyncio.CancelledError:
         logger.warning('Download was interrupted')
         process.kill()
+        await process.communicate()
     finally:
         return response
 
