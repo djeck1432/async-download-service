@@ -22,7 +22,7 @@ def get_params_environment():
         help='Install response delay for server'
     )
     parser.add_argument(
-        '--archives_path',
+        '--folders_path',
         help='Write path to archives'
     )
     args = parser.parse_args()
@@ -30,13 +30,13 @@ def get_params_environment():
         logging.basicConfig(
             format=u'%(levelname)-8s %(message)s', level=logging.INFO, filename=u'logs.log'
         )
-    return args.archives_path,int(args.delay)
+    return args.folders_path,int(args.delay)
 
 async def archivate(request):
     response = web.StreamResponse()
     archive_name = request.match_info.get('archive_hash')
-    archives_path,response_delay = get_params_environment()
-    if not os.path.exists(f'{archives_path}/{archive_name}'):
+    folders_path,response_delay = get_params_environment()
+    if not os.path.exists(f'{folders_path}/{archive_name}'):
         raise HTTPNotFound(headers=None, reason=None,
              body=None, text='Ваша папка не найдена', content_type=None)
 
@@ -47,7 +47,7 @@ async def archivate(request):
             cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            cwd=archives_path,
+            cwd=folders_path,
         )
     chunk_b_size = 100 * 1024
     try:
