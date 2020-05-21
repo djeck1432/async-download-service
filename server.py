@@ -4,7 +4,6 @@ import os
 import argparse
 import logging
 from aiohttp import web
-from dotenv import load_dotenv
 from aiohttp.web_exceptions import HTTPNotFound
 
 logger = logging.getLogger('archive')
@@ -19,7 +18,7 @@ async def archivate(request):
     response.headers['Content-Disposition'] = f'form-data; filename={archive_name}.zip'
     await response.prepare(request)
     cmd = f'zip -r  - {archive_name}'
-    cwd = app.folders_path,
+    cwd = app.folders_path
     process = await asyncio.create_subprocess_exec(
             *cmd.split(' '),
             cwd=cwd,
