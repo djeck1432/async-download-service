@@ -31,15 +31,15 @@ pip install -r requirements.txt
 ## Как запустить
 
 ```bash
-python server.py [folders_path]
+python server.py  -- folders_path [folders_path]
 ```
 Если вы хотите включить логирование, выполните следующую команду:
  ```bash
- python server.py [folders_path] --logs 
+ python server.py -- folders_path [folders_path] --vvv 
  ```
  Если хотите сделать задержку ответа сервера, то выполните следующую команду:
   ```bash
- python server.py {folders_path} --delay {delay of response} 
+ python server.py -- folders_path [folders_path] --delay [delay of response] 
  ```
  
 
