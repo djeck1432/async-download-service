@@ -11,37 +11,36 @@ logger = logging.getLogger('archive')
 
 async def archivate(request):
     response = web.StreamResponse()
-    archive_name = request.match_info.get('archive_hash')
-    archive_path = os.path.join(app.folders_path,archive_name)
+    archive_hash = request.match_info['archive_hash']
+    archive_path = os.path.join(app.folders_path,archive_hash)
     if not os.path.exists(archive_path):
         raise HTTPNotFound(text='Ваша папка не найдена')
-    response.headers['Content-Disposition'] = f'form-data; filename={archive_name}.zip'
+    response.headers['Content-Disposition'] = f'form-data; filename={archive_hash}.zip'
     await response.prepare(request)
-    cmd = f'zip -r  - {archive_name}'
+    cmd = ['zip','-r','-',archive_hash]
     cwd = app.folders_path
     process = await asyncio.create_subprocess_exec(
-            *cmd.split(' '),
+            *cmd,
             cwd=cwd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-
     chunk_b_size = 100 * 1024
     try:
         while True:
             stdout_chunk = await process.stdout.read(chunk_b_size)
             await asyncio.sleep(app.response_delay)
             if not stdout_chunk:
-                logger.info('Archive downloaded success')
+                logger.info('Archive uploaded successfully')
                 break
             await response.write(stdout_chunk)
 
     except asyncio.CancelledError:
         logger.info('Download was interrupted')
-        process.kill()
-        await process.communicate()
         raise
     finally:
+        process.kill()
+        await process.communicate()
         return response
 
 
@@ -78,7 +77,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     logging.basicConfig(
-        format=u'%(levelname)-8s %(message)s', level=args.verbose, filename=f'{args.log_path}'
+        format=u'%(levelname)-8s %(message)s', level=args.verbose, filename=args.log_path,
     )
 
     app = web.Application()
