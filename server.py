@@ -66,9 +66,9 @@ if __name__ == '__main__':
         type=int
     )
     parser.add_argument(
-        '--log_name',
-        help='Name of log file',
-        default='logs'
+        '--log_path',
+        help='Path to log file',
+        default='logs.log'
     )
     parser.add_argument(
         '--folders_path',
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     logging.basicConfig(
-        format=u'%(levelname)-8s %(message)s', level=args.verbose, filename=f'{args.log_name}.log'
+        format=u'%(levelname)-8s %(message)s', level=args.verbose, filename=f'{args.log_path}'
     )
 
     app = web.Application()
