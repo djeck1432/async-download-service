@@ -37,7 +37,7 @@ async def archivate(request):
             await response.write(stdout_chunk)
 
     except asyncio.CancelledError:
-        logger.warning('Download was interrupted')
+        logger.info('Download was interrupted')
         process.kill()
         await process.communicate()
         raise
